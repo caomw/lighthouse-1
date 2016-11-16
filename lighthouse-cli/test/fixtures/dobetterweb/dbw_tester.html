@@ -228,6 +228,13 @@ function singleUseEventListenerTest() {
   document.addEventListener('click', function(e) {
     // noop
   }, {once: true});
+
+  // PASS - removes some other event
+  document.addEventListener('click', function(e) {
+    this.removeEventListener('someotherevent', function() {
+      // noop
+    });
+  });
 }
 
 function geolocationOnStartTest() {

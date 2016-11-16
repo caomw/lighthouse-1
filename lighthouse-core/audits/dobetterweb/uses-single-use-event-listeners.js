@@ -70,8 +70,8 @@ class SingleUseEventsAudit extends Audit {
 
     // Filter out event listeners that should be single-use.
     const results = listeners.filter(loc => {
-      const removesOwnListener = loc.handler.description.match(
-          /\.removeEventListener\(/g);
+      const regex = new RegExp(`\\.removeEventListener\\(\\s*['"]${loc.type}['"]\\s*,`, 'g');
+      const removesOwnListener = loc.handler.description.match(regex);
       const sameHost = loc.url ? url.parse(loc.url).host === pageHost : true;
       return sameHost && removesOwnListener && !loc.once;
     }).map(loc => {
