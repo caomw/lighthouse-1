@@ -24,6 +24,7 @@
 
 const url = require('url');
 const Audit = require('../audit');
+const EventHelpers = require('../../lib/event-helpers');
 const Formatter = require('../../formatters/formatter');
 
 class SingleUseEventsAudit extends Audit {
@@ -74,19 +75,15 @@ class SingleUseEventsAudit extends Audit {
       const removesOwnListener = loc.handler.description.match(regex);
       const sameHost = loc.url ? url.parse(loc.url).host === pageHost : true;
       return sameHost && removesOwnListener && !loc.once;
-    }).map(loc => {
-      const handler = loc.handler ? loc.handler.description : '...';
-      return Object.assign({
-        label: `line: ${loc.line}, col: ${loc.col}`,
-        code: `${loc.objectName}.addEventListener('${loc.type}', ${handler})`
-      }, loc);
-    });
+    }).map(EventHelpers.addFormattedCodeSnippet);
+
+    const groupedResults = EventHelpers.groupCodeSnippetsByLocation(results);
 
     return SingleUseEventsAudit.generateAuditResult({
-      rawValue: results.length === 0,
+      rawValue: groupedResults.length === 0,
       extendedInfo: {
         formatter: Formatter.SUPPORTED_FORMATS.URLLIST,
-        value: results
+        value: groupedResults
       }
     });
   }
